@@ -9,11 +9,11 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
+    text: '#111827',
     background: '#ffffff',
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    textSecondary: '#6B7280',
   },
   dark: {
     text: '#ffffff',
@@ -22,6 +22,39 @@ export const Colors = {
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
   },
+} as const;
+
+export const BrandColors = {
+  primary: '#BA3806',
+  primaryDark: '#9C2F05',
+  primaryLight: '#FFF7ED',
+  primaryLightBorder: '#FFEDD5',
+  accentOrange: '#EA580C',
+  charcoal: '#1E2530',
+  charcoalActive: '#262E3B',
+  chipBg: '#E2E8F0',
+  chipText: '#1E293B',
+  quickChipBg: '#F8FAFC',
+  quickChipBorder: '#E2E8F0',
+  quickChipText: '#334155',
+  cardBg: '#F1F5F9',
+  cardBorder: '#E2E8F0',
+  tipsBg: '#EFF6FF',
+  tipsBorder: '#DBEAFE',
+  tipsText: '#1E293B',
+  subtleText: '#64748B',
+  border: '#E2E8F0',
+  inputBg: '#FFFFFF',
+  dotRed: '#E11D48',
+  avatarBg: '#BA3806',
+} as const;
+
+export const Radius = {
+  sm: 6,
+  md: 10,
+  lg: 14,
+  xl: 18,
+  full: 9999,
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;

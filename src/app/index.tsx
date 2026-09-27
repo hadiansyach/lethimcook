@@ -1,98 +1,135 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from "expo-router";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { BottomNavBar } from "@/components/navigation/BottomNavBar";
+import { CookingPreferencesCard } from "@/components/recipe/CookingPreferencesCard";
+import { HeaderBar } from "@/components/recipe/HeaderBar";
+import { HeroSection } from "@/components/recipe/HeroSection";
+import { IngredientInputSection } from "@/components/recipe/IngredientInputSection";
+import { SubmitSection } from "@/components/recipe/SubmitSection";
+import { Spacing } from "@/constants/theme";
+import { useRecipeStore } from "@/store/useRecipeStore";
 
 export default function HomeScreen() {
+  // Centralized in-memory state from Zustand (avoids URL bloating!)
+  const {
+    ingredients,
+    addIngredient,
+    removeIngredient,
+    time,
+    setTime,
+    styleOption,
+    setStyleOption,
+    level,
+    setLevel,
+    quotaRemaining,
+    quotaTotal,
+  } = useRecipeStore();
+
+  // Submit handler: validates input and cleanly navigates without bloated URL params
+  const handleSubmit = () => {
+    if (ingredients.length === 0) {
+      Alert.alert(
+        "Perhatian",
+        "Masukkan minimal 1 bahan makanan untuk mencari resep.",
+      );
+      return;
+    }
+
+    // Clean navigation: state is safely stored in memory
+    router.push("/results");
+  };
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboardView}
+      >
+        <View style={styles.screenWrapper}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Top Bar */}
+            <HeaderBar
+              quotaRemaining={quotaRemaining}
+              quotaTotal={quotaTotal}
+              onPressHistory={() => router.push("/history")}
+              onPressProfile={() =>
+                Alert.alert("Profil", "Membuka profil pengguna")
+              }
+            />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+            {/* Hero Section */}
+            <HeroSection />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+            {/* Quota Banner */}
+            {/* <QuotaCard remaining={quotaRemaining} total={quotaTotal} /> */}
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+            {/* Ingredient Input & Tag List with Empty State & Auto-Add on Comma */}
+            <IngredientInputSection
+              ingredients={ingredients}
+              onAddIngredient={addIngredient}
+              onRemoveIngredient={removeIngredient}
+            />
+
+            {/* Cooking Preferences Card */}
+            <CookingPreferencesCard
+              time={time}
+              onChangeTime={setTime}
+              styleOption={styleOption}
+              onChangeStyleOption={setStyleOption}
+              level={level}
+              onChangeLevel={setLevel}
+            />
+
+            {/* Primary Action Button */}
+            <SubmitSection
+              onPress={handleSubmit}
+              disabled={ingredients.length === 0}
+            />
+          </ScrollView>
+
+          {/* Bottom Navigation Bar */}
+          <BottomNavBar activeTab="index" />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    backgroundColor: "#FFFFFF",
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  keyboardView: {
     flex: 1,
+  },
+  screenWrapper: {
+    flex: 1,
+    width: "100%",
+    maxWidth: 520,
+    alignSelf: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.five,
     gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
 });
